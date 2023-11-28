@@ -32,7 +32,7 @@
   (require 'ewoc)
   (require 'pcase)
   (require 'subr-x)
-  
+
   (require 'taxy-magit-section)
 
   (require 'ement-macros))
@@ -168,24 +168,24 @@ include with the request (see Matrix spec)."
   ;; SPEC: 10.1.1.
   (declare (indent defun))
   (interactive (list (ement-complete-session)
-		     :name (read-string "New room name: ")
-		     :alias (read-string "New room alias (e.g. \"foo\" for \"#foo:matrix.org\"): ")
-		     :topic (read-string "New room topic: ")
-		     :visibility (completing-read "New room visibility: " '(private public))))
+                     :name (read-string "New room name: ")
+                     :alias (read-string "New room alias (e.g. \"foo\" for \"#foo:matrix.org\"): ")
+                     :topic (read-string "New room topic: ")
+                     :visibility (completing-read "New room visibility: " '(private public))))
   (cl-labels ((given-p (var) (and var (not (string-empty-p var)))))
     (pcase-let* ((endpoint "createRoom")
-		 (data (ement-aprog1
-			   (ement-alist "visibility" visibility)
-			 (when (given-p alias)
-			   (push (cons "room_alias_name" alias) it))
-			 (when (given-p name)
-			   (push (cons "name" name) it))
-			 (when (given-p topic)
-			   (push (cons "topic" topic) it))
-			 (when invite
-			   (push (cons "invite" invite) it))
-			 (when direct-p
-			   (push (cons "is_direct" t) it))
+                 (data (ement-aprog1
+                           (ement-alist "visibility" visibility)
+                         (when (given-p alias)
+                           (push (cons "room_alias_name" alias) it))
+                         (when (given-p name)
+                           (push (cons "name" name) it))
+                         (when (given-p topic)
+                           (push (cons "topic" topic) it))
+                         (when invite
+                           (push (cons "invite" invite) it))
+                         (when direct-p
+                           (push (cons "is_direct" t) it))
                          (when creation-content
                            (push (cons "creation_content" creation-content) it)))))
       (ement-api session endpoint :method 'post :data (json-encode data)
@@ -201,10 +201,10 @@ Then call function THEN with response data.  Optional string
 arguments are NAME, ALIAS, and TOPIC."
   (declare (indent defun))
   (interactive (list (ement-complete-session)
-		     :name (read-string "New space name: ")
-		     :alias (read-string "New space alias (e.g. \"foo\" for \"#foo:matrix.org\"): ")
-		     :topic (read-string "New space topic: ")
-		     :visibility (completing-read "New space visibility: " '(private public))))
+                     :name (read-string "New space name: ")
+                     :alias (read-string "New space alias (e.g. \"foo\" for \"#foo:matrix.org\"): ")
+                     :topic (read-string "New space topic: ")
+                     :visibility (completing-read "New space visibility: " '(private public))))
   (ement-create-room session :name name :alias alias :topic topic :visibility visibility
     :creation-content (ement-alist "type" "m.space") :then then))
 
@@ -377,11 +377,11 @@ new one automatically if necessary."
   ;; SPEC: 13.23.2.
   (interactive
    (let* ((session (ement-complete-session))
-	  (user-id (ement-complete-user-id))
-	  (message (read-string "Message: ")))
+          (user-id (ement-complete-user-id))
+          (message (read-string "Message: ")))
      (list session user-id message)))
   (if-let* ((seen-user (gethash user-id ement-users))
-	    (existing-direct-room (ement--direct-room-for-user seen-user session)))
+            (existing-direct-room (ement--direct-room-for-user seen-user session)))
       (progn
         (ement-send-message existing-direct-room session :body message)
         (message "Message sent to %s <%s> in room %S <%s>."
@@ -393,10 +393,10 @@ new one automatically if necessary."
     (ement-create-room session :direct-p t :invite (list user-id)
       :then (lambda (data)
               (let* ((room-id (alist-get 'room_id data))
-	             (room (or (cl-find room-id (ement-session-rooms session)
+                     (room (or (cl-find room-id (ement-session-rooms session)
                                         :key #'ement-room-id)
-		               ;; New room hasn't synced yet: make a temporary struct.
-		               (make-ement-room :id room-id)))
+                               ;; New room hasn't synced yet: make a temporary struct.
+                               (make-ement-room :id room-id)))
                      (direct-rooms-account-data-event-content
                       ;; FIXME: Make account-data a map.
                       (alist-get 'content (cl-find-if (lambda (event)
@@ -410,7 +410,7 @@ new one automatically if necessary."
                 ;; Send message to new room.
                 (ement-send-message room session :body message)
                 (message "Room \"%s\" created for user %s.  Sending message..."
-	                 room-id user-id))))))
+                         room-id user-id))))))
 
 (defun ement-tag-room (tag room session)
   "Toggle TAG for ROOM on SESSION."
@@ -794,19 +794,19 @@ unseen user IDs to be input as well."
                 ;; displayname in that room.
                 (format "%s <%s>"
                         (ement-user-displayname user)
-			(ement-user-id user))))
+                        (ement-user-id user))))
     (let* ((display-to-id
-	    (cl-loop for key being the hash-keys of ement-users
-		     using (hash-values value)
-		     collect (cons (format-user value) key)))
+            (cl-loop for key being the hash-keys of ement-users
+                     using (hash-values value)
+                     collect (cons (format-user value) key)))
            (user-at-point (when (equal major-mode 'ement-room-mode)
                             (when-let ((node (ewoc-locate ement-ewoc)))
                               (when (ement-event-p (ewoc-data node))
                                 (format-user (ement-event-sender (ewoc-data node)))))))
-	   (selected-user (completing-read "User: " (mapcar #'car display-to-id)
+           (selected-user (completing-read "User: " (mapcar #'car display-to-id)
                                            nil nil user-at-point)))
       (or (alist-get selected-user display-to-id nil nil #'equal)
-	  selected-user))))
+          selected-user))))
 
 (cl-defun ement-put-account-data
     (session type data &key room
@@ -1035,7 +1035,7 @@ period, anywhere in the body."
                                        "@" (group
                                             ;; Group 2: displayname.  (NOTE: Does not work
                                             ;; with displaynames containing spaces.)
-                                            (1+ (seq (optional ".") alnum)))
+                                            (1+ (seq (optional ".") (any alnum "." "_" "=" "/" "+" "-"))))
                                        (optional ":" (1+ (seq (optional ".") alnum))))
                                       (or ":" eow eos (syntax punctuation)))
                                  (seq (group
