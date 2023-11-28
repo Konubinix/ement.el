@@ -1935,12 +1935,12 @@ are sync batch tokens.  Used for, e.g. filling gaps in
                   (ement-room-retro-callback room session data
                                              :set-prev-batch nil)
                   (pcase-let* (((map end chunk) data))
-		    ;; HACK: Comparing the END and TO tokens ought to
-		    ;; work for determining whether we are done
-		    ;; filling, but it isn't (maybe the server isn't
-		    ;; returning the TO token as END when there are no
-		    ;; more events), so instead we'll check the length
-		    ;; of the chunk.
+                    ;; HACK: Comparing the END and TO tokens ought to
+                    ;; work for determining whether we are done
+                    ;; filling, but it isn't (maybe the server isn't
+                    ;; returning the TO token as END when there are no
+                    ;; more events), so instead we'll check the length
+                    ;; of the chunk.
                     (unless (< (length chunk) batch-size)
                       ;; More pages remain to be loaded.
                       (let ((remaining-limit (- limit batch-size)))
@@ -1954,7 +1954,7 @@ are sync batch tokens.  Used for, e.g. filling gaps in
                                                      (ement-room-display-name room)
                                                      (or (ement-room-canonical-alias room)
                                                          (ement-room-id room))))
-			  ;; FIXME: Remove this message after further testing.
+                          ;; FIXME: Remove this message after further testing.
                           (message "Ement: Continuing to fill gap in %S (%S) (remaining limit: %s)"
                                    (ement-room-display-name room)
                                    (or (ement-room-canonical-alias room)
@@ -1964,7 +1964,7 @@ are sync batch tokens.  Used for, e.g. filling gaps in
                            room session end to :limit remaining-limit))))))))
     ;; FIXME: Remove this message after further testing.
     (message "Ement: Filling gap in %S (%S)"
-	     (ement-room-display-name room)
+             (ement-room-display-name room)
              (or (ement-room-canonical-alias room)
                  (ement-room-id room)))
     (ement-api session endpoint :timeout 30
@@ -2458,7 +2458,7 @@ before the earliest-seen message)."
   (declare (function ement--make-event "ement.el")
            (function ement--put-event "ement.el"))
   (pcase-let* (((cl-struct ement-room local) room)
-	       ((map _start end chunk state) data)
+               ((map _start end chunk state) data)
                ((map buffer) local)
                (num-events (length chunk))
                ;; We do 3 things for chunk events, so we count them 3 times when
@@ -2561,7 +2561,7 @@ the previously oldest event."
                (endpoint (format "rooms/%s/typing/%s"
                                  (url-hexify-string room-id) (url-hexify-string user-id)))
                (data (ement-alist "typing" typing "timeout" 20000)))
-    (ement-api session endpoint :method 'put :data (json-encode data)
+    (ement-api session endpoint :method 'put :data (let ((json-false nil)) (json-encode data))
       ;; We don't really care about the response, I think.
       :then #'ignore)))
 
@@ -4303,7 +4303,7 @@ To be called from a minibuffer opened from
                        (remove-hook 'minibuffer-exit-hook compose-fn-symbol)
                        ;; FIXME: Probably need to unintern the symbol.
                        (ement-room-compose-message ement-room ement-session :body body)
-		       ;; FIXME: This doesn't propagate the send-message-filter to the minibuffer.
+                       ;; FIXME: This doesn't propagate the send-message-filter to the minibuffer.
                        (setf ement-room-send-message-filter send-message-filter)
                        (setq-local ement-room-replying-to-event replying-to-event
                                    ement-room-editing-event editing-event)
@@ -5556,28 +5556,28 @@ Web-compatible HTML output, using HTML like:
                   ;; Riot's syntax coloring doesn't support "elisp", but "lisp" works.
                   ("elisp" "lisp")
                   (else else)))
-	  (code (org-html-format-code src-block info))
-	  (label (let ((lbl (and (org-element-property :name src-block)
-				 (org-export-get-reference src-block info))))
-		   (if lbl (format " id=\"%s\"" lbl) ""))))
+          (code (org-html-format-code src-block info))
+          (label (let ((lbl (and (org-element-property :name src-block)
+                                 (org-export-get-reference src-block info))))
+                   (if lbl (format " id=\"%s\"" lbl) ""))))
       (if (not lang) (format "<pre class=\"example\"%s>\n%s</pre>" label code)
-	(format "<div class=\"org-src-container\">\n%s%s\n</div>"
-		;; Build caption.
-		(let ((caption (org-export-get-caption src-block)))
-		  (if (not caption) ""
-		    (let ((listing-number
-			   (format
-			    "<span class=\"listing-number\">%s </span>"
-			    (format
-			     (org-html--translate "Listing %d:" info)
-			     (org-export-get-ordinal
-			      src-block info nil #'org-html--has-caption-p)))))
-		      (format "<label class=\"org-src-name\">%s%s</label>"
-			      listing-number
-			      (string-trim (org-export-data caption info))))))
-		;; Contents.
-		(format "<pre><code class=\"src language-%s\"%s>%s</code></pre>"
-			lang label code))))))
+        (format "<div class=\"org-src-container\">\n%s%s\n</div>"
+                ;; Build caption.
+                (let ((caption (org-export-get-caption src-block)))
+                  (if (not caption) ""
+                    (let ((listing-number
+                           (format
+                            "<span class=\"listing-number\">%s </span>"
+                            (format
+                             (org-html--translate "Listing %d:" info)
+                             (org-export-get-ordinal
+                              src-block info nil #'org-html--has-caption-p)))))
+                      (format "<label class=\"org-src-name\">%s%s</label>"
+                              listing-number
+                              (string-trim (org-export-data caption info))))))
+                ;; Contents.
+                (format "<pre><code class=\"src language-%s\"%s>%s</code></pre>"
+                        lang label code))))))
 
 ;;;;; Completion
 
