@@ -698,9 +698,9 @@ Also rebuilds `ement-room-mode--advertised-keymap'."
       ;; pre-existing remappings; so we do this before we define other
       ;; remappings.
       (cl-labels ((copy-from (key definition)
-		    (unless (lookup-key ement-room-mode--advertised-keymap
+                    (unless (lookup-key ement-room-mode--advertised-keymap
                                         (vector key))
-		      (define-key ement-room-mode--advertised-keymap
+                      (define-key ement-room-mode--advertised-keymap
                                   (vector key) definition))))
         ;; Copy from a copy of `ement-room-mode-map', otherwise the latter will
         ;; also acquire (share) the remap keybindings which are added below.
@@ -2237,6 +2237,8 @@ mentioning the ROOM and CONTENT."
     (setf body (replace-regexp-in-string (rx bos "*" (1+ space)) "" body t t))
     (list event body)))
 
+(defvar ement-reply-fallback-regexp "\\`\\(\\(?:> .*\n\\)+\n\\)")
+
 (defun ement-room-edit-message (event room session body)
   "Edit EVENT in ROOM on SESSION to have new BODY.
 The message must be one sent by the local user.  If EVENT is
@@ -2248,7 +2250,8 @@ itself an edit of another event, the original event is edited."
                    (ement-room-with-typing
                      (let* ((prompt (format "Edit message (%s): "
                                             (ement-room-display-name ement-room)))
-                            (body (ement-room-read-string prompt body 'ement-room-message-history
+                            (body-no-fallback (replace-regexp-in-string ement-reply-fallback-regexp "" body))
+                            (body (ement-room-read-string prompt body-no-fallback 'ement-room-message-history
                                                           nil 'inherit-input-method)))
                        (when (string-empty-p body)
                          (user-error "To delete a message, use command `ement-room-delete-message'"))
@@ -4929,9 +4932,9 @@ This function is used as the value of `isearch-search-fun-function'."
 (defun ement-room-compose-history-isearch-function (string bound noerror)
   "Isearch in message history."
   (let ((search-fun
-	 ;; Use standard functions to search within message text
-	 (isearch-search-fun-default))
-	found)
+         ;; Use standard functions to search within message text
+         (isearch-search-fun-default))
+        found)
     (or
      ;; 1. First try searching in the initial message
      (funcall search-fun string nil noerror)
@@ -4940,22 +4943,22 @@ This function is used as the value of `isearch-search-fun-function'."
      ;; nil (i.e. not while lazy-highlighting search strings in the current message).
      (unless bound
        (condition-case nil
-	   (progn
-	     (while (not found)
-	       (if isearch-forward
-		   (ement-room-compose-history-next-message 1)
-		 (ement-room-compose-history-prev-message 1))
+           (progn
+             (while (not found)
+               (if isearch-forward
+                   (ement-room-compose-history-next-message 1)
+                 (ement-room-compose-history-prev-message 1))
                (goto-char (if isearch-forward (point-min) (point-max)))
-	       (setq isearch-barrier (point)
+               (setq isearch-barrier (point)
                      isearch-opoint (point))
-	       ;; After putting the next/prev history element, search the string in
+               ;; After putting the next/prev history element, search the string in
                ;; them again, until `ement-room-compose-history-next-message' or
-	       ;; `ement-room-compose-history-prev-message' raises an error at the
-	       ;; beginning/end of history.
-	       (setq found (funcall search-fun string nil noerror)))
-	     ;; Return point of the new search result.
-	     (point))
-	 ;; Return nil on any isearch errors, including the "no next/preceding item"
+               ;; `ement-room-compose-history-prev-message' raises an error at the
+               ;; beginning/end of history.
+               (setq found (funcall search-fun string nil noerror)))
+             ;; Return point of the new search result.
+             (point))
+         ;; Return nil on any isearch errors, including the "no next/preceding item"
          ;; user-errors signalled from `ement-room-compose-history-prev-message'.
          (error nil))))))
 
