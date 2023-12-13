@@ -1182,7 +1182,7 @@ DATA is an unsent message event's data alist."
                ((cl-struct ement-user (id replying-to-sender-id)) replying-to-sender)
                ((map ('body replying-to-body) ('formatted_body replying-to-formatted-body)) content)
                (replying-to-sender-name (ement--user-displayname-in ement-room replying-to-sender))
-               (quote-string (format "> <%s> %s\n\n" replying-to-sender-name replying-to-body))
+               (quote-string (format "%s\n\n" (replace-regexp-in-string "^" "> " (format "<%s> %s" replying-to-sender-name replying-to-body))))
                (reply-body (alist-get "body" data nil nil #'string=))
                (reply-formatted-body (alist-get "formatted_body" data nil nil #'string=))
                (reply-body-with-quote (concat quote-string reply-body))
