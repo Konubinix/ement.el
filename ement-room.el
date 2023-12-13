@@ -3535,11 +3535,7 @@ buries the buffer and shows the next unread room, if any."
       (progn
         ;; At the bottom of the buffer: mark read and show next unread room.
         (when ement-room-mark-rooms-read
-          (ement-room-mark-read ement-room ement-session
-            :read-event (ewoc-data (ement-room--ewoc-last-matching ement-ewoc
-                                     (lambda (data) (ement-event-p data))))
-            :fully-read-event (ewoc-data (ement-room--ewoc-last-matching ement-ewoc
-                                           (lambda (data) (ement-event-p data))))))
+          (call-interactively 'ement-room-mark-read))
         (set-buffer-modified-p nil)
         (if-let ((rooms-window (cl-find-if (lambda (window)
                                              (member (buffer-name (window-buffer window))
