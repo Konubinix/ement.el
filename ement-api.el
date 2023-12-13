@@ -108,7 +108,7 @@ usually the DATA argument should be passed through
     ;; Omit `then' from debugging because if it's a partially applied
     ;; function on the session object, which may be very large, it
     ;; will take a very long time to print into the warnings buffer.
-    ;;  (ement-debug (current-time) method url headers)
+    ;; (ement-message "%s %s %s %s" (current-time) method url headers)
     (if queue
         (plz-run
          (apply #'plz-queue queue plz-args))
