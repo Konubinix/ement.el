@@ -5755,7 +5755,7 @@ members list and return already-seen members instead.  For use in
     (delete-dups
      (cl-loop for member in members
               collect (ement-user-id member)
-              collect (ement--user-displayname-in room member)))))
+              collect (string-replace " " " " (ement--user-displayname-in room member))))))
 
 (defun ement-room--room-aliases-and-ids ()
   "Return a list of room names and aliases seen in current session.
