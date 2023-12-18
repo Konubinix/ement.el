@@ -1035,25 +1035,25 @@ period, anywhere in the body."
                                        "@" (group
                                             ;; Group 2: displayname.  (NOTE: Does not work
                                             ;; with displaynames containing spaces.)
-                                            (1+ (seq (optional ".") (any alnum "." "_" "=" "/" "+" "-"))))
+                                            (1+ (seq (optional ".") (any alnum " " "." "_" "=" "/" "+" "-"))))
                                        (optional ":" (1+ (seq (optional ".") alnum))))
                                       (or ":" eow eos (syntax punctuation)))
                                  (seq (group
                                        ;; Group 3: MXID username or displayname.
-                                       (1+ (not blank)))
+                                       (1+ (any alnum " " "." "_" "=" "/" "+" "-")))
                                       ":" (1+ blank)))))
                  (pos 0) (replace-group) (replacement))
       (while (setf pos (string-match regexp body pos))
         (if (setf replacement
-                  (or (when-let (member (gethash (match-string 1 body) members))
+                  (or (when-let (member (gethash (and (match-string 1 body) (string-replace " " " " (match-string 1 body))) members))
                         ;; Found user ID: use it as replacement.
                         (setf replace-group 1)
-                        (format template (match-string 1 body)
+                        (format template (and (match-string 1 body) (string-replace " " " " (match-string 1 body)))
                                 (ement--xml-escape-string (ement--user-displayname-in room member))))
                       (when-let* ((name (or (when (match-string 2 body)
                                               (setf replace-group 1)
-                                              (match-string 2 body))
-                                            (prog1 (match-string 3 body)
+                                              (string-replace " " " " (match-string 2 body)))
+                                            (prog1 (string-replace " " " " (match-string 3 body))
                                               (setf replace-group 3))))
                                   (members (members-having-displayname name members))
                                   (member (when (= 1 (length members))
