@@ -5457,7 +5457,7 @@ Then invalidate EVENT's node to show the image."
                (url (when mxc-url
                       (ement--mxc-to-url mxc-url ement-session)))
                (human-size (file-size-human-readable size))
-               (human-duration (format-seconds "%m:%s" (/ duration 1000)))
+               (human-duration (if duration (format-seconds "%m:%s" (/ duration 1000)) "no duration"))
                (string (format "[audio: %s (%s) (%s) (%s)]" body mimetype human-duration human-size)))
     (concat (propertize string
                         'action #'browse-url
