@@ -1359,10 +1359,14 @@ Suitable for use in completion, etc."
                (server-name) (media-id))
     (string-match (rx "mxc://" (group (1+ (not (any "/"))))
                       "/" (group (1+ anything))) uri)
-    (setf server-name (match-string 1 uri)
-          media-id (match-string 2 uri))
-    (format "%s/_matrix/media/r0/download/%s/%s"
-            uri-prefix server-name media-id)))
+    (if (not (string= uri ""))
+        (progn (setf server-name (match-string 1 uri)
+                     media-id (match-string 2 uri))
+               (format "%s/_matrix/media/r0/download/%s/%s"
+                       uri-prefix server-name media-id))
+      (progn
+        (warn "In the bug of the empty string in ement--mxc-to-url")
+        ""))))
 
 (defun ement--mxc-to-endpoint (uri)
   "Return API endpoint for MXC URI.
