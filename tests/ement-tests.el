@@ -53,6 +53,44 @@
     (should (equal (ement--format-body-mentions "Hello, @foo:matrix.org, how are you?" room)
                    "Hello, <a href=\"https://matrix.to/#/@foo:matrix.org\">foo</a>, how are you?"))))
 
+(ert-deftest ement-room--event-mentions-user-p ()
+  (let* ((user (make-ement-user :id "@test:matrix.org"
+                                :username "test"
+                                :displayname "Test User"))
+         (user-with-period (make-ement-user :id "@test.user:matrix.org"
+                                            :username "test.user"
+                                            :displayname "Test User"))
+         (user-with-hyphen (make-ement-user :id "@test-user:matrix.org"
+                                            :username "test-user"
+                                            :displayname "Test User"))
+         (room (make-ement-room :displaynames (let ((table (make-hash-table :test 'equal)))
+                                                (puthash user "Test User" table)
+                                                table)))
+         (event (make-ement-event)))
+    (cl-macrolet ((test-mention (user body result)
+                    `(progn
+                       (setf (ement-event-content event) (list (cons 'body ,body)))
+                       (should (equal ,result (if (ement-room--event-mentions-user-p event ,user room) t nil))))))
+
+      (test-mention user "hello test" t)
+      (test-mention user "hello test." t)
+      ;; (test-mention user "hello test-name" nil)
+      (test-mention user "hello @test" t)
+      (test-mention user "the latest" nil)
+      (test-mention user "hello testing" nil)
+      (test-mention user "hellotest" nil)
+
+      (test-mention user "hello @test:matrix.org" t)
+      (test-mention user "@test:matrix.org" t)
+
+      (test-mention user-with-period "hello test.user" t)
+      (test-mention user-with-period "@test.user" t)
+      (test-mention user-with-period "test.username" nil)
+
+      (test-mention user-with-hyphen "hello test-user" t)
+      ;; (test-mention user-with-hyphen "test-user-name" nil)
+      )))
+
 (provide 'ement-tests)
 
 ;;; ement-tests.el ends here
